@@ -1,0 +1,11 @@
+irc:
+  channels:
+  nick: 'Maya-'
+  channel_mapping:
+  host: 'irc.quakenet.org'
+  port: 6667
+discord:
+  token: 'fake_token'
+  bot_id: ''
+  channel_mapping:
+
