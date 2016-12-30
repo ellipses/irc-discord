@@ -36,7 +36,7 @@ async def on_message(message):
         return
 
     await discord_to_irc.async_q.put(
-        (format_message(message.author.name, message.content),
+        (format_message(message.author.name, message.clean_content),
          message.channel.id)
     )
 
