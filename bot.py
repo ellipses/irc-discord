@@ -15,8 +15,13 @@ irc_to_discord = janus.Queue()
 discord_to_irc = janus.Queue()
 
 
-def format_message(user, msg):
-    return "<%s>: %s" % (user, msg)
+def format_message(user, msg, to_irc=False):
+    if to_irc:
+        return "\x02 <%s>: \x02 %s" % (user, msg)
+    else:
+        # Prepend the message with zero width white space char to
+        # avoid bot loops.
+        return "\u200B**%s** %s" % (user, msg)
 
 
 @client.event
@@ -36,7 +41,7 @@ async def on_message(message):
         return
 
     await discord_to_irc.async_q.put(
-        (format_message(message.author.name, message.content),
+        (format_message(message.author.name, message.content, True),
          message.channel.id)
     )
 
@@ -59,9 +64,8 @@ async def dequeue_irc(config):
             logging.debug(
                 'Skipping %s because %s isnt in the mapping' % (msg, channel)
             )
-        # Prepend the message with zero width white space char to
-        # avoid bot loops.
-        await client.send_message(server, '\u200B' + msg)
+        else:
+            await client.send_message(server, msg)
 
 
 @irc3.event(irc3.rfc.PRIVMSG)
