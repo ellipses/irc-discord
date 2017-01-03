@@ -15,13 +15,17 @@ irc_to_discord = janus.Queue()
 discord_to_irc = janus.Queue()
 
 
-def format_message(user, msg, to_irc=False):
-    if to_irc:
-        return "\x02 <%s>: \x02 %s" % (user, msg)
-    else:
-        # Prepend the message with zero width white space char to
-        # avoid bot loops.
-        return "\u200B**%s** %s" % (user, msg)
+def format_irc_message(message):
+    msg = "\x02 <%s>: \x02 %s" % (message.author.name, message.clean_content)
+    for attachment in message.attachments:
+        msg += ' ' + attachment['url']
+    return msg
+
+
+def format_discord_message(user, msg):
+    # Prepend the message with zero width white space char to
+    # avoid bot loops.
+    return "\u200B**%s** %s" % (user, msg)
 
 
 @client.event
@@ -41,8 +45,7 @@ async def on_message(message):
         return
 
     await discord_to_irc.async_q.put(
-        (format_message(message.author.name, message.content, True),
-         message.channel.id)
+        (format_irc_message(message), message.channel.id)
     )
 
 
@@ -71,7 +74,7 @@ async def dequeue_irc(config):
 @irc3.event(irc3.rfc.PRIVMSG)
 async def on_privmsg(bot, mask, data, target, *args, **kw):
     await irc_to_discord.async_q.put(
-        (format_message(mask.split('!')[0], data), target)
+        (format_discord_message(mask.split('!')[0], data), target)
     )
 
 
