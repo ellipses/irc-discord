@@ -68,7 +68,18 @@ async def dequeue_irc(config):
                 'Skipping %s because %s isnt in the mapping' % (msg, channel)
             )
         else:
-            await client.send_message(server, msg)
+            for _ in range(client.max_retries):
+                try:
+                    await client.send_message(server, msg)
+                    break
+                except discord.HTTPException:
+                    await asyncio.sleep(0.1)
+            else:
+                logging.exception(
+                    'Failed to send message %s to %s after %s retries' % (
+                        msg, server, config.max_retries
+                    )
+                )
 
 
 @irc3.event(irc3.rfc.PRIVMSG)
@@ -111,6 +122,7 @@ def start_irc(config):
 def start_discord(loop, config):
     asyncio.set_event_loop(loop)
     client.loop.create_task(dequeue_irc(config))
+    client.max_retries = config.get('max_retries', 3)
     client.run(config['token'])
 
 
