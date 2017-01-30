@@ -126,6 +126,10 @@ def start_discord(loop, config):
     client.run(config['token'])
 
 
+class ThreadDeadException(Exception):
+    pass
+
+
 def main():
     config_path = os.path.join(os.path.dirname(__file__),
                                'conf/bot.yaml')
@@ -136,12 +140,16 @@ def main():
         )
     )
     irc_thread = threading.Thread(target=start_irc, args=(config['irc'],))
-
+    
+    join_timeout = config.get('join_timeout', 60)
     discord_thread.start()
     irc_thread.start()
-    discord_thread.join()
-    irc_thread.join()
-
+    
+    while True:
+        discord_thread.join(join_timeout)
+        irc_thread.join(join_timeout)
+        if not discord_thread.is_alive() or not irc_thread.is_alive():
+            raise ThreadDeathException
 
 if __name__ == '__main__':
     main()
