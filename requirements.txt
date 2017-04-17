@@ -1,4 +1,4 @@
 # To install discord perform python3 -m pip install -U discord.py
 irc3
 pyyaml
-janus
+asyncio-redis

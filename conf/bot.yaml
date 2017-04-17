@@ -1,11 +1,15 @@
 irc:
-  channels:
+  channels: '#fakechannel'
   nick: 'Maya-'
-  channel_mapping:
   host: 'irc.quakenet.org'
   port: 6667
 discord:
   token: 'fake_token'
-  bot_id: ''
-  channel_mapping:
+channel_mapping:
+  '#fakechannel': 'fake_discord_server_id'
+discord_key: 'discord_origin'
+irc_key: 'irc_origin'
+ttl: 3600
+
+
 
