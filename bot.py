@@ -25,7 +25,7 @@ def format_irc_message(message, channel):
     msg = "\x02 <%s>: \x02 %s" % (message.author.name, message.clean_content)
     for attachment in message.attachments:
         msg += ' ' + attachment['url']
-    return format_redis_value(msg, message.timestamp.timestamp(), channel)
+    return format_redis_value(msg, time.time(), channel)
 
 
 def format_discord_message(user, msg, channel):
